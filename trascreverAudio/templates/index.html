@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Transcrição de Audio | IA</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+<div class="container contact-form">
+    <div class="contact-image container">
+        <img width="350" height="277" src="../static/img/audiobook_headphones_books_hb-350x277.png"
+             alt="rocket_contact"/>
+    </div>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <h3>TRANSCREVER AUDIO</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input type="file" class="form-control-file" name="upload_arq" accept=".wav">
+                </div>
+                <div class="form-group">
+                    <input type="file" accept="audio/*;capture=microphone" name="audio">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <textarea disabled="true" name="txtMsg" class="form-control" rows="5"
+                              style="width: 100%; height: 150px;">
+                        {{ conversion }}
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
