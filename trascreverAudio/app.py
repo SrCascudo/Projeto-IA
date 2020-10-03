@@ -1,6 +1,8 @@
 import os
 import speech_recognition as sr
+import shutil
 
+from pydub import AudioSegment
 from flask import Flask, render_template, request, redirect, flash
 from werkzeug.utils import secure_filename
 
@@ -23,16 +25,31 @@ def upload():
         file = request.files.get('upload_arq', None)
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return render_template('index.html', conversion=converter(filename))
+        filename = convert_format(filename, str.replace(filename, '.mp3', ''))
+        return render_template('index.html', conversion=transcrever(filename))
 
-def converter(nome_arq):
+
+def transcrever(nome_arq):
     r = sr.Recognizer()
-    file = sr.AudioFile(UPLOAD_FOLDER + nome_arq)
+    file = sr.AudioFile(nome_arq)
     with file as source:
         r.adjust_for_ambient_noise(source)
         audio = r.record(source)
         result = r.recognize_google(audio, language='pt-br')
+        delete_dir()
     return result.__str__().upper()
+
+
+def convert_format(before_name, after_name):
+    sound = AudioSegment.from_mp3(UPLOAD_FOLDER + before_name)
+    sound.export(UPLOAD_FOLDER + after_name + '.wav', format="wav")
+    return UPLOAD_FOLDER + after_name + '.wav'
+
+
+def delete_dir():
+    for files in os.walk(UPLOAD_FOLDER):
+        for file in files[2]:
+            os.remove(UPLOAD_FOLDER+file)
 
 
 if __name__ == '__main__':
