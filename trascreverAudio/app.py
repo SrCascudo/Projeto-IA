@@ -1,7 +1,8 @@
 import os
 import speech_recognition as sr
-import shutil
+from fuzzywuzzy import fuzz
 
+import youtube_dl
 from pydub import AudioSegment
 from flask import Flask, render_template, request, redirect, flash
 from werkzeug.utils import secure_filename
@@ -23,10 +24,16 @@ def index():
 def upload():
     if request.method == 'POST':
         file = request.files.get('upload_arq', None)
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        filename = convert_format(filename, str.replace(filename, '.mp3', ''))
-        return render_template('index.html', conversion=transcrever(filename))
+        link = request.form['youtube']
+        if link is not None:
+            coverter = transcrever(download(link))
+            possibilidade = 'A Pauta tem {}% de chance de estar no video'.format(fuzz.partial_ratio(coverter, request.form['pauta']))
+            return render_template('index.html', conversion=coverter, possibilidade=possibilidade)
+        else:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            filename = convert_format(filename, str.replace(filename, '.mp3', ''))
+            return render_template('index.html', conversion=transcrever(filename))
 
 
 def transcrever(nome_arq):
@@ -44,6 +51,22 @@ def convert_format(before_name, after_name):
     sound = AudioSegment.from_mp3(UPLOAD_FOLDER + before_name)
     sound.export(UPLOAD_FOLDER + after_name + '.wav', format="wav")
     return UPLOAD_FOLDER + after_name + '.wav'
+
+
+def download(link):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'wav',
+            'preferredquality': '192',
+        }],
+        'outtmpl': UPLOAD_FOLDER + '/converter.%(ext)s',
+
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([link])
+    return UPLOAD_FOLDER + 'converter.wav'
 
 
 def delete_dir():
