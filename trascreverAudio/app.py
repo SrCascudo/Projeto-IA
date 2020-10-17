@@ -27,7 +27,7 @@ def upload():
         link = request.form['youtube']
         if link is not None:
             coverter = transcrever(download(link))
-            possibilidade = 'A Pauta tem {}% de chance de estar no video'.format(fuzz.partial_ratio(coverter, request.form['pauta']))
+            possibilidade = 'A Pauta tem {}% de similaridade com video'.format(fuzz.partial_ratio(coverter, request.form['pauta']))
             return render_template('index.html', conversion=coverter, possibilidade=possibilidade)
         else:
             filename = secure_filename(file.filename)
